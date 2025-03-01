@@ -1,24 +1,16 @@
-# Use the latest Ubuntu image
-FROM ubuntu:latest
+FROM ubuntu:latest  
+ENV DEBIAN_FRONTEND=noninteractive  
 
-# Prevent interactive prompts during installation
-ENV DEBIAN_FRONTEND=noninteractive
+# Install necessary dependencies  
+RUN apt update && apt install -y wget wine  
 
-# Update and install necessary packages
-RUN apt update && apt install -y \
-    xrdp \
-    xfce4 \
-    xfce4-terminal \
-    dbus-x11 \
-    x11-xserver-utils \
-    && apt clean
+# Download and install LiteManager Server  
+RUN wget https://litemanager.com/soft/LinuxServer/LiteManager_Ubuntu_x64.tar.gz && \  
+    tar -xzf LiteManager_Ubuntu_x64.tar.gz && \  
+    chmod +x litemanager && ./litemanager --install  
 
-# Create a user for RDP
-RUN useradd -m -s /bin/bash rdpuser && echo "rdpuser:password123" | chpasswd
+# Expose LiteManager's default port  
+EXPOSE 5650  
 
-# Configure xRDP
-RUN echo "xfce4-session" > /home/rdpuser/.xsession && \
-    chown rdpuser:rdpuser /home/rdpuser/.xsession
-
-# Start xRDP on container startup
-CMD /etc/init.d/xrdp start && tail -F /var/log/xrdp.log
+# Run LiteManager on startup  
+CMD ["./litemanager", "--start"]
