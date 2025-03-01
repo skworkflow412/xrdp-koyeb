@@ -1,16 +1,15 @@
-FROM ubuntu:latest  
-ENV DEBIAN_FRONTEND=noninteractive  
+# Use Ubuntu base image
+FROM ubuntu:latest
 
-# Install necessary dependencies  
-RUN apt update && apt install -y wget wine  
+# Set non-interactive mode
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Download and install LiteManager Server  
-RUN wget https://litemanager.com/soft/LinuxServer/LiteManager_Ubuntu_x64.tar.gz && \  
-    tar -xzf LiteManager_Ubuntu_x64.tar.gz && \  
-    chmod +x litemanager && ./litemanager --install  
+# Install Chrome Remote Desktop, Xfce desktop environment, and dependencies
+RUN apt update && apt install -y \
+    wget curl xfce4 xfce4-terminal chrome-remote-desktop
 
-# Expose LiteManager's default port  
-EXPOSE 5650  
+# Create a user for remote access
+RUN useradd -m -s /bin/bash rdpuser && echo "rdpuser:password123" | chpasswd
 
-# Run LiteManager on startup  
-CMD ["./litemanager", "--start"]
+# Start Chrome Remote Desktop on launch
+CMD ["chrome-remote-desktop", "--start"]
